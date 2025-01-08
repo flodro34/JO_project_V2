@@ -34,6 +34,11 @@ public class TicketService {
             .orElse(null);
     }
 
+    public Ticket getTicketByTokenTicket(String tokenTicket) {
+            return ticketRepository.findByTokenTicket(tokenTicket);
+    }
+
+
     public Ticket createTicket(Ticket ticket) {
         if(ticket.getIdTicket() == null) {
             return ticketRepository.save(ticket);
@@ -70,4 +75,6 @@ public class TicketService {
                 });
 
     }
+
+
 }

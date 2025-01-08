@@ -21,5 +21,5 @@ public class SignupRequest {
     @Pattern(regexp = "(,=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%]).{8,}", message = "Le mot de passe doit contenir au moins 8 caractères, 1 majuscule, 1 minuscule, 1 chiffre et 1 caractère spécial. ")
     private String password;
 
-    private Set<String> roles;
+    private Set<String> role;
 }

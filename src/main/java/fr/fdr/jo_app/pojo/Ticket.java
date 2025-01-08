@@ -28,7 +28,9 @@ public class Ticket {
 
     private String tokenUser;
 
-    private String tokenTransaction;
+    @OneToOne
+    @JoinColumn(name = "idTransaction", referencedColumnName = "idTransaction")
+    private Transaction transaction;
 
     @ManyToOne
     @JoinColumn(name = "idUser", referencedColumnName = "idUser")
@@ -36,12 +38,19 @@ public class Ticket {
     private User user;
 
     public Ticket() {
-
     }
 
-    public Ticket(Offer offer,Date date) {
+    public Ticket(Offer offer, Date date, User user, Transaction transaction) {
         this.offer = offer;
         this.date = date;
+        this.user = user;
+        this.transaction = transaction;
+        if (user != null) {
+            this.tokenUser = user.getTokenUser();
+        }
+        if (transaction != null) {
+            this.tokenTicket = generateTokenTicket();
+        }
     }
 
     @PrePersist
@@ -54,7 +63,8 @@ public class Ticket {
     }
 
     private String generateTokenTicket() {
-        return tokenUser + "-" + tokenTransaction;
+        return (tokenUser != null ? tokenUser : "unknownUser") + "-" +
+                (transaction != null ? transaction.getIdTransaction() : "unknownTransaction");
     }
 
     @Override
@@ -65,7 +75,7 @@ public class Ticket {
                 ", date=" + date +
                 ", tokenTicket='" + tokenTicket + '\'' +
                 ", tokenUser='" + tokenUser + '\'' +
-                ", tokenTransaction='" + tokenTransaction + '\'' +
+                ", transaction=" + (transaction != null ? transaction.toString() : "null") +
                 ", user=" + (user != null ? user.toString() : "null") +
                 '}';
     }

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,8 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name="users",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "username")
@@ -54,4 +54,11 @@ public class User {
     public User() {
 
     }
+
+    public void updateTokenUser(String tokenUser) {
+        this.tokenUser = tokenUser;
+    }
+
+
+
 }
