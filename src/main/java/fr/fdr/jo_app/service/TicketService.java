@@ -1,13 +1,18 @@
 package fr.fdr.jo_app.service;
 
+import fr.fdr.jo_app.pojo.Offer;
 import fr.fdr.jo_app.pojo.Ticket;
+import fr.fdr.jo_app.pojo.Transaction;
+import fr.fdr.jo_app.repository.OfferRepository;
 import fr.fdr.jo_app.repository.TicketRepository;
+import fr.fdr.jo_app.repository.TransactionRepository;
 import fr.fdr.jo_app.security.models.User;
 import fr.fdr.jo_app.security.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +27,12 @@ public class TicketService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private OfferRepository offerRepository;
 
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
@@ -74,6 +85,35 @@ public class TicketService {
                     return ticketRepository.save(oldTicket);
                 });
 
+    }
+
+    public Ticket buyTicket(Ticket ticket, Double amount) {
+
+        if (ticket.getOffer() != null && ticket.getOffer().getIdOffer() == null) {
+            Offer savedOffer = offerRepository.save(ticket.getOffer());
+            ticket.setOffer(savedOffer);
+        } else if (ticket.getOffer() != null) {
+            Offer existingOffer = offerRepository.findById(ticket.getOffer().getIdOffer())
+                    .orElseThrow(() -> new IllegalArgumentException("Offer not found!"));
+            ticket.setOffer(existingOffer);
+        }
+
+        // 1. Generate transaction
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setDateTransaction(new Date(System.currentTimeMillis()));
+        transaction.setTokenTransaction(generateTransactionToken());
+        transaction = transactionRepository.save(transaction);
+
+        // 2. Associate ticket/transaction
+        ticket.setTransaction(transaction);
+
+        // 3. Save ticket
+        return ticketRepository.save(ticket);
+    }
+
+    private String generateTransactionToken() {
+        return "TRX-" + System.currentTimeMillis();
     }
 
 

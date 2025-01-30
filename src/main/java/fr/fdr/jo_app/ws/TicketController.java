@@ -39,6 +39,9 @@ public class TicketController {
         return ticketService.updateTicket(id,ticket);
     }
 
-
+    @PostMapping("/buy")
+    public Ticket buyTicket(@RequestBody Ticket ticket, @RequestParam Double amount) {
+        return ticketService.buyTicket(ticket, amount);
+    }
 
 }

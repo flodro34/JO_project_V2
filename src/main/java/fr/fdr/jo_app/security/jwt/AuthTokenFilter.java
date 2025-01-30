@@ -26,8 +26,18 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        // Exclus explicitement les routes publiques
+        String path = request.getServletPath();
+        System.out.println("Request Path: " + path);
+        if (isPublicPath(path)) {
+            // Passe directement au prochain filtre
+            filterChain.doFilter(request, response);
+            return;
+        }
         try{
             String jwt = parseJwt(request);
+            System.out.println("JWT: " + jwt);
+
             if(jwt != null && jwtUtils.validateJwtToken(jwt)){
                 String username = jwtUtils.getUsernameFromJwtToken(jwt);
 
@@ -55,4 +65,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+    private boolean isPublicPath(String path) {
+        // Ajouter toutes les routes publiques qui doivent être ignorées par le filtre
+        return path.equals("/api/tickets/buy") ||
+                path.startsWith("/api/auth/") ||
+                path.equals("/api/some-other-public-endpoint");
+    }
+
 }
