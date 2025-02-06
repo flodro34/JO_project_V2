@@ -2,6 +2,7 @@ package fr.fdr.jo_app.pojo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.fdr.jo_app.security.models.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,13 +29,13 @@ public class Ticket {
 
     private String tokenUser;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "idTransaction", referencedColumnName = "idTransaction")
     private Transaction transaction;
 
     @ManyToOne
     @JoinColumn(name = "idUser", referencedColumnName = "idUser")
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private User user;
 
     public Ticket() {
@@ -55,16 +56,16 @@ public class Ticket {
 
     @PrePersist
     @PreUpdate
-    private void prepareData() {
+    public void prepareData() {
         if (user != null) {
             this.tokenUser = user.getTokenUser();
         }
         this.tokenTicket = generateTokenTicket();
     }
 
-    private String generateTokenTicket() {
+    public String generateTokenTicket() {
         return (tokenUser != null ? tokenUser : "unknownUser") + "-" +
-                (transaction != null ? transaction.getIdTransaction() : "unknownTransaction");
+                (transaction != null && transaction.getTokenTransaction() != null ? transaction.getTokenTransaction() : "unknownTransaction");
     }
 
     @Override

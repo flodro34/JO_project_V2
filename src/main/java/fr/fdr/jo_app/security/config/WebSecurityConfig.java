@@ -79,8 +79,9 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET,"/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/tickets/buy").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers(HttpMethod.POST,"/api/ticket/buy").permitAll()
+                        //.anyRequest().authenticated())
+                        .anyRequest().permitAll());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

@@ -3,6 +3,7 @@ package fr.fdr.jo_app.ws;
 import fr.fdr.jo_app.pojo.Ticket;
 import fr.fdr.jo_app.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,9 +30,19 @@ public class TicketController {
         ticketService.deleteTicketById(id);
     }
 
-    @PostMapping
-    public Ticket createTicket(@RequestBody Ticket ticket) {
-        return ticketService.createTicket(ticket);
+//    @PostMapping
+//    public Ticket createTicket(@RequestBody Ticket ticket) {
+//        return ticketService.createTicket(ticket);
+//    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createTicket(@RequestBody Ticket ticket) {
+        try {
+            Ticket newTicket = ticketService.createTicket(ticket);
+            return ResponseEntity.ok(newTicket);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
@@ -39,9 +50,5 @@ public class TicketController {
         return ticketService.updateTicket(id,ticket);
     }
 
-    @PostMapping("/buy")
-    public Ticket buyTicket(@RequestBody Ticket ticket, @RequestParam Double amount) {
-        return ticketService.buyTicket(ticket, amount);
-    }
 
 }

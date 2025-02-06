@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TicketService {
@@ -51,11 +52,22 @@ public class TicketService {
 
 
     public Ticket createTicket(Ticket ticket) {
-        if(ticket.getIdTicket() == null) {
-            return ticketRepository.save(ticket);
-        }else{
-            return null;
-        }
+
+        //Check Offer
+        Offer offer = offerRepository.findById(ticket.getOffer().getIdOffer())
+                .orElseThrow(() -> new RuntimeException("Offer not found !"));
+
+        // Check User
+        User user = userRepository.findById(ticket.getUser().getIdUser())
+                .orElseThrow(() -> new RuntimeException("User not found !"));
+
+        // Update token
+        ticket.setUser(user);
+        ticket.setOffer(offer);
+        ticket.setTokenUser(user.getTokenUser()); // Met à jour le tokenUser
+        ticket.setTokenTicket(ticket.generateTokenTicket());
+
+        return ticketRepository.save(ticket);
     }
 
     public void deleteTicketById(Long id) {
@@ -68,16 +80,6 @@ public class TicketService {
     }
 
     public Optional<Ticket> updateTicket (Long id, Ticket ticket) {
-//        Ticket ticketToUpdate = ticketRepository.findById(id).orElse(null);
-//        if(ticketToUpdate != null) {
-//            ticketToUpdate.setIdTicket(ticket.getIdTicket());
-//            ticketToUpdate.setUser(ticket.getUser());
-//            ticketToUpdate.setDate(ticket.getDate());
-//            ticketToUpdate.setTokenTicket(ticket.getTokenTicket());
-//            this.ticketRepository.save(ticketToUpdate);
-//
-//        }
-//        return ticketToUpdate;
 
         return ticketRepository.findById(id)
                 .map(oldTicket -> {
@@ -87,34 +89,6 @@ public class TicketService {
 
     }
 
-    public Ticket buyTicket(Ticket ticket, Double amount) {
-
-        if (ticket.getOffer() != null && ticket.getOffer().getIdOffer() == null) {
-            Offer savedOffer = offerRepository.save(ticket.getOffer());
-            ticket.setOffer(savedOffer);
-        } else if (ticket.getOffer() != null) {
-            Offer existingOffer = offerRepository.findById(ticket.getOffer().getIdOffer())
-                    .orElseThrow(() -> new IllegalArgumentException("Offer not found!"));
-            ticket.setOffer(existingOffer);
-        }
-
-        // 1. Generate transaction
-        Transaction transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setDateTransaction(new Date(System.currentTimeMillis()));
-        transaction.setTokenTransaction(generateTransactionToken());
-        transaction = transactionRepository.save(transaction);
-
-        // 2. Associate ticket/transaction
-        ticket.setTransaction(transaction);
-
-        // 3. Save ticket
-        return ticketRepository.save(ticket);
-    }
-
-    private String generateTransactionToken() {
-        return "TRX-" + System.currentTimeMillis();
-    }
 
 
 }

@@ -8,4 +8,6 @@ public interface ApiRegistration {
 
     final String REST_OFFER = "/offer";
 
+    final String REST_TRANSACTION = "/buy";
+
 }
