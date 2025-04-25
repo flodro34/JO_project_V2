@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.Optional;
 
 @Service
@@ -25,5 +26,16 @@ public class AuthService {
             monUser.setPassword(passwordEncoder.encode(user.getPassword()));
             this.userRepository.save(monUser);
         }
+    }
+
+    public String generateTokenUser() {
+        return UUID.randomUUID().toString(); // Génération d'un token unique
+    }
+
+    public void updateTokenUser(String username, String tokenUser) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+        user.setTokenUser(tokenUser);
+        userRepository.save(user);
     }
 }

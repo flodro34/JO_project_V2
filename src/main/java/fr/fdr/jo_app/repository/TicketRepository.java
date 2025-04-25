@@ -16,4 +16,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByUser(User user);
 
     //List<Ticket> findByOffer(Offer offer);
+
+    Ticket findByTokenTicket(String tokenTicket);
 }

@@ -11,7 +11,25 @@ public class Offer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOffer;
 
-    private String type;
-
     private Double price;
+
+    @Enumerated(EnumType.STRING)
+    private OfferType type;
+
+    public Offer() {
+    }
+
+    public Offer(Double price, OfferType type) {
+        this.price = price;
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Offer{" +
+                "idOffer=" + idOffer +
+                ", price=" + price +
+                ", type=" + type +
+                '}';
+    }
 }

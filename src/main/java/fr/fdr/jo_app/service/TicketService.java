@@ -1,15 +1,21 @@
 package fr.fdr.jo_app.service;
 
+import fr.fdr.jo_app.pojo.Offer;
 import fr.fdr.jo_app.pojo.Ticket;
+import fr.fdr.jo_app.pojo.Transaction;
+import fr.fdr.jo_app.repository.OfferRepository;
 import fr.fdr.jo_app.repository.TicketRepository;
+import fr.fdr.jo_app.repository.TransactionRepository;
 import fr.fdr.jo_app.security.models.User;
 import fr.fdr.jo_app.security.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TicketService {
@@ -23,6 +29,12 @@ public class TicketService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private OfferRepository offerRepository;
+
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
     }
@@ -34,12 +46,28 @@ public class TicketService {
             .orElse(null);
     }
 
+    public Ticket getTicketByTokenTicket(String tokenTicket) {
+            return ticketRepository.findByTokenTicket(tokenTicket);
+    }
+
+
     public Ticket createTicket(Ticket ticket) {
-        if(ticket.getIdTicket() == null) {
-            return ticketRepository.save(ticket);
-        }else{
-            return null;
-        }
+
+        //Check Offer
+        Offer offer = offerRepository.findById(ticket.getOffer().getIdOffer())
+                .orElseThrow(() -> new RuntimeException("Offer not found !"));
+
+        // Check User
+        User user = userRepository.findById(ticket.getUser().getIdUser())
+                .orElseThrow(() -> new RuntimeException("User not found !"));
+
+        // Update token
+        ticket.setUser(user);
+        ticket.setOffer(offer);
+        ticket.setTokenUser(user.getTokenUser()); // Met à jour le tokenUser
+        ticket.setTokenTicket(ticket.generateTokenTicket());
+
+        return ticketRepository.save(ticket);
     }
 
     public void deleteTicketById(Long id) {
@@ -52,16 +80,6 @@ public class TicketService {
     }
 
     public Optional<Ticket> updateTicket (Long id, Ticket ticket) {
-//        Ticket ticketToUpdate = ticketRepository.findById(id).orElse(null);
-//        if(ticketToUpdate != null) {
-//            ticketToUpdate.setIdTicket(ticket.getIdTicket());
-//            ticketToUpdate.setUser(ticket.getUser());
-//            ticketToUpdate.setDate(ticket.getDate());
-//            ticketToUpdate.setTokenTicket(ticket.getTokenTicket());
-//            this.ticketRepository.save(ticketToUpdate);
-//
-//        }
-//        return ticketToUpdate;
 
         return ticketRepository.findById(id)
                 .map(oldTicket -> {
@@ -70,4 +88,7 @@ public class TicketService {
                 });
 
     }
+
+
+
 }

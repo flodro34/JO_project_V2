@@ -4,6 +4,7 @@ import fr.fdr.jo_app.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -11,14 +12,15 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.sql.SQLOutput;
 import java.util.Date;
+import java.util.logging.Logger;
 
 @Component
 public class JwtUtils {
 
-    @Value("${api-transport.jwtSecret}")
+    @Value("${JO-app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${api-transport.jwtExpirationMs}")
+    @Value("${JO-app.jwtExpirationMs}")
     private int jwtExpirationInMs;
 
     public String generateJwtToken(Authentication authentication) {
@@ -26,7 +28,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + jwtExpirationInMs))
+                //.setExpiration(new Date(new Date().getTime() + jwtExpirationInMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -38,7 +40,8 @@ public class JwtUtils {
     public String getUsernameFromJwtToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key()).build()
-                .parseClaimsJwt(token).getBody().getSubject();
+                //.parseClaimsJwt(token).getBody().getSubject();
+                .parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean validateJwtToken(String token) {
@@ -49,9 +52,9 @@ public class JwtUtils {
         }catch (MalformedJwtException e){
             System.out.println("Invalid JWT token" + e.getMessage());
         }catch (ExpiredJwtException e){
-            System.out.printf("Jwt token is expired" + e.getMessage());
+            System.out.println("Jwt token is expired" + e.getMessage());
         }catch (UnsupportedJwtException e){
-            System.out.printf("JWT token is unsupported" + e.getMessage());
+            System.out.println("JWT token is unsupported" + e.getMessage());
         }catch (IllegalArgumentException e){
             System.out.println("Jwt token contains invalid characters" + e.getMessage());
         }

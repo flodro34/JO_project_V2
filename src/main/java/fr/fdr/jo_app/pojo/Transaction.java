@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -20,6 +22,9 @@ public class Transaction {
     private Date dateTransaction;
 
     private String tokenTransaction;
+
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL)
+    private List<Ticket> tickets = new ArrayList<>();
 
     public Transaction(Double amount, Date dateTransaction, String tokenTransaction) {
         this.amount = amount;
